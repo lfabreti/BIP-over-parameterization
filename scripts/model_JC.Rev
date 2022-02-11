@@ -1,0 +1,27 @@
+################################################################################
+#
+# RevBayes Script: JC substitution model
+# 
+#
+# authors:  Sebastian Höhna and Luiza Fabreti
+#
+################################################################################
+
+######################
+# Substitution Model #
+######################
+
+
+# create a deterministic variable for the rate matrix, JC
+Q <- fnJC(4)
+
+
+#############################
+# Among Site Rate Variation #
+#############################
+
+# vector for the among site rate variation
+sr <- [ 1.0 ]
+
+# the probability of a site being invariable, +I
+p_inv <- 0.0

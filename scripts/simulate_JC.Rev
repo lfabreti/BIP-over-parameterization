@@ -1,0 +1,47 @@
+################################################################################
+#
+# RevBayes Script: Simulating data sets under the JC model
+# 
+#
+# authors:  Jeremy Brown, Sebastian Höhna and Luiza Fabreti
+#
+################################################################################
+
+# Define number of simulated data, number of taxa, number of sites and mean branch length
+numSims <- 100
+NUM_Species <- [16,64]
+NUM_Sites <- [100,1000]
+BL <- [10,50]
+
+for (n_species in NUM_Species){
+  for (n_sites in NUM_Sites){
+    for (bl_mean in BL){
+
+      names = [taxon("t001")]
+      for (i in 2:n_species) names.append( taxon("t"+ifelse(i < 10, "00"+i, ifelse(i < 100, "0"+i,i))) )
+      
+      n_branches <- 2 * n_species - 3
+      
+      Q := fnJC(4)
+      
+      for (j in 1:numSims){
+        
+        topology ~ dnUniformTopology(names)
+        for (i in 1:n_branches){
+          br_lens[i] ~ dnExponential(bl_mean)
+        }
+        phylogeny := treeAssembly(topology, br_lens)
+        write(phylogeny,filename="../data_sim_trees/JC_"+n_species+"_taxa_nSites_"+n_sites+"_bl_"+(1/bl_mean)+"/simTree_"+j+".tre")
+        seq ~ dnPhyloCTMC(tree=phylogeny, Q=Q, type="DNA", nSites=n_sites)
+        writeNexus("../data_sim_alignments/JC_"+n_species+"_taxa_nSites_"+n_sites+"_bl_"+(1/bl_mean)+"/simData_" + j + ".nex",seq)
+        clear(topology)
+        clear(phylogeny)
+        clear(br_lens)
+        
+      }
+
+    }
+  }
+}
+
+quit()

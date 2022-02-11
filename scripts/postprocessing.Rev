@@ -1,0 +1,55 @@
+################################################################################
+#
+# RevBayes Script: post-process MCMC output
+# 
+#
+# authors:  Sebastian Höhna and Luiza Fabreti
+#
+################################################################################
+
+
+convergence_result <- readTable("convergence_assessment/"+SUBST_MODEL+"_nTaxa_" + NUM_TAXA + "_nSites_" + NUM_SITES + "_bl_" + BL_MEAN + "_sim_" + SIM + ".txt")
+
+if(convergence_result[1][1] == "TRUE"){
+
+	tree_file_name = "data_sim_trees/JC_" + NUM_TAXA + "_taxa_nSites_" + NUM_SITES + "_bl_" + BL_MEAN + "/simTree" + SIM + ".tre"
+
+
+
+	# Read in the tree trace and construct the consensus tree tree #
+	trace = readTreeTrace("output/"+SUBST_MODEL+"_nTaxa_" + NUM_TAXA + "_nSites_" + NUM_SITES + "_bl_" + BL_MEAN + "_sim_" + SIM + ".trees", treetype="non-clock")
+	trace.setBurnin(0.2)
+
+	true_tree = readBranchLengthTrees( tree_file_name )[1]
+
+	## first compute the CI size for trees
+	ci_trees = trace.getUniqueTrees(0.95).size()
+	pp_true_tree = trace.getTopologyFrequency( true_tree ) / trace.size(TRUE)
+
+	write(file="results_sim_CI_trees/"+SUBST_MODEL+"_nTaxa_" + NUM_TAXA + "_nSites_" + NUM_SITES + "_bl_" + BL_MEAN + "_sim_" + SIM + ".txt","CI-size,Covered\n",append=FALSE)
+	write(file="results_sim_CI_trees/"+SUBST_MODEL+"_nTaxa_" + NUM_TAXA + "_nSites_" + NUM_SITES + "_bl_" + BL_MEAN + "_sim_" + SIM + ".txt",ci_trees + "," + trace.isTreeCovered(true_tree) + "\n",append=TRUE)
+
+	write(file="results_sim_true_tree_PP/"+SUBST_MODEL+"_nTaxa_" + NUM_TAXA + "_nSites_" + NUM_SITES + "_bl_" + BL_MEAN + "_sim_" + SIM + ".txt","PP(tree)\n",append=FALSE)
+	write(file="results_sim_true_tree_PP/"+SUBST_MODEL+"_nTaxa_" + NUM_TAXA + "_nSites_" + NUM_SITES + "_bl_" + BL_MEAN + "_sim_" + SIM + ".txt", pp_true_tree + "\n",append=TRUE)
+
+
+	## second, compute the CI for the tree length
+	tl_true = true_tree.treeLength()
+	tl = trace.computeTreeLengths()
+	tl_lower = quantile(tl, 0.025)
+	tl_upper = quantile(tl, 0.975)
+	write(file="results_sim_TL/"+SUBST_MODEL+"_nTaxa_" + NUM_TAXA + "_nSites_" + NUM_SITES + "_bl_" + BL_MEAN + "_sim_" + SIM + ".txt","CI-size,Covered\n",append=FALSE)
+	write(file="results_sim_TL/"+SUBST_MODEL+"_nTaxa_" + NUM_TAXA + "_nSites_" + NUM_SITES + "_bl_" + BL_MEAN + "_sim_" + SIM + ".txt",(tl_upper-tl_lower) + "," + (tl_true > tl_lower && tl_true < tl_upper) + "\n",append=TRUE)
+
+
+	## third, compute the pp for all clades
+	sampled_clades = trace.getUniqueClades(0.0)
+
+	index = 0
+	write(file="results_sim_clades_PP/"+SUBST_MODEL+"_nTaxa_" + NUM_TAXA + "_nSites_" + NUM_SITES + "_bl_" + BL_MEAN + "_sim_" + SIM + ".txt","Index,PP,TRUE\n",append=FALSE)
+	for (clade in sampled_clades) {
+	    pp = trace.cladeProbability( clade )
+	    write(file="results_sim_clades_PP/"+SUBST_MODEL+"_nTaxa_" + NUM_TAXA + "_nSites_" + NUM_SITES + "_bl_" + BL_MEAN + "_sim_" + SIM + ".txt",++index + "," + pp + "," + (true_tree.containsClade(clade) ) + "\n",append=TRUE)
+	}
+
+}
