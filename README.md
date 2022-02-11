@@ -28,7 +28,7 @@ We will simulate 100 alignments under the Jukes-Cantor model, for each of the ei
 
 From the `scripts` folder, run the script `simulate_JC.Rev` with the command:
 
-  rb simulate_JC.Rev
+	rb simulate_JC.Rev
 
 You should see two new folders called `data_sim_trees` and `data_sim_alignments`. Inside each folder there are another eight folders, each for a specific simulation scenario.
 
@@ -37,4 +37,4 @@ Full analysis
 
 The full analysis pipeline is in the script `full_analysis.sh`. It can be run, from the main folder, with the command:
 
-   bash full_analysis.sh
+	bash full_analysis.sh
