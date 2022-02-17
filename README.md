@@ -1,4 +1,4 @@
-# Substitution Model over-parameterization
+# Bayesian Inference of Phylogeny - Substitution Model over-parameterization
 
 Bayesian phylogenetic inference with substitution model over-parameterization.
 Scripts used in the paper: *Bayesian inference of phylogeny is robust to substitution model over-parameterization*
